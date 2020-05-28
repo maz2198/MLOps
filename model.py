@@ -32,6 +32,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import RandomForestRegressor, VotingClassifier
 
 
 diamonds = pd.read_csv('diamonds.csv')
@@ -71,13 +72,19 @@ layer_2_nodes = 100
 layer_3_nodes = 50
 
 # Defing the model.
-model = MLPRegressor(hidden_layer_sizes=(layer_1_nodes, layer_2_nodes, layer_3_nodes),
+
+MLP = MLPRegressor(hidden_layer_sizes=(layer_1_nodes, layer_2_nodes, layer_3_nodes),
                      activation='relu',
                      solver='adam',
                      learning_rate_init=learning_rate,
                      max_iter=training_epochs,
                      shuffle=True,)
 
+
+rf = RandomForestRegressor(random_state=42,n_jobs=-1,n_estimators=layer_2_nodes,max_depth=12,min_samples_split=2)
+
+# Creating Ensemble Model Soft VotingClassifier
+model = VotingClassifier([('MLP',MLP),('rf',rf)],voting='soft',weights=[2,1])
 # Training of the model.
 model.fit(X_train, np.ravel(y_train))
 
